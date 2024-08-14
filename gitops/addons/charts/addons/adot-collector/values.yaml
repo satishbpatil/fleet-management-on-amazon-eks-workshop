@@ -1,0 +1,41 @@
+ampurl: ${amp_url}
+region: ${region}
+ekscluster: ${eks_cluster}
+accountId: ${account_id}
+
+assumeRoleArn: ""
+
+globalScrapeTimeout: "120s"
+globalScrapeSampleLimit: "15s"
+
+
+enableAPIserver: true
+
+enableTracing: false
+otlpGrpcEndpoint: ""
+otlpHttpEndpoint: ""
+tracingTimeout: "10s"
+tracingSendBatchSize: "10"
+
+enableCustomMetrics: false
+customMetrics: ""
+
+enableJava: false
+javaScrapeSampleLimit: "10"
+javaPrometheusMetricsEndpoint: ""
+
+enableNginx: false
+nginxScrapeSampleLimit: "10"
+nginxPrometheusMetricsEndpoint: ""
+
+enableIstio: false
+istioScrapeSampleLimit: "10"
+istioPrometheusMetricsEndpoint: ""
+
+adotLoglevel: "normal"
+adotServiceTelemetryLoglevel: "INFO"
+
+enableAdotcollectorMetrics: true
+
+serviceAccount: "adot-collector-kubeprometheus"
+namespace: "adot-collector-kubeprometheus"

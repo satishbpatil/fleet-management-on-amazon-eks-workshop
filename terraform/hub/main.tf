@@ -1,6 +1,7 @@
 data "aws_caller_identity" "current" {}
 data "aws_availability_zones" "available" {}
 data "aws_region" "current" {}
+data "aws_partition" "current" {}
 data "aws_iam_session_context" "current" {
   # This data source provides information on the IAM source role of an STS assumed role
   # For non-role ARNs, this data source simply passes the ARN through issuer ARN
@@ -43,15 +44,25 @@ locals {
   vpc_cidr        = var.vpc_cidr
   azs             = slice(data.aws_availability_zones.available.names, 0, 3)
 
-  gitops_addons_url      = data.terraform_remote_state.git.outputs.gitops_addons_url
-  gitops_addons_basepath = data.terraform_remote_state.git.outputs.gitops_addons_basepath
-  gitops_addons_path     = data.terraform_remote_state.git.outputs.gitops_addons_path
-  gitops_addons_revision = data.terraform_remote_state.git.outputs.gitops_addons_revision
+  gitops_addons_url      = "https://github.com/satishbpatil/fleet-management-on-amazon-eks-workshop.git"
+  gitops_addons_basepath = "gitops/"
+  gitops_addons_path     = "addons"
+  gitops_addons_revision = "riv24"
 
-  gitops_platform_url      = data.terraform_remote_state.git.outputs.gitops_platform_url
-  gitops_platform_basepath = data.terraform_remote_state.git.outputs.gitops_platform_basepath
-  gitops_platform_path     = data.terraform_remote_state.git.outputs.gitops_platform_path
-  gitops_platform_revision = data.terraform_remote_state.git.outputs.gitops_platform_revision
+  gitops_platform_url      = "https://github.com/satishbpatil/fleet-management-on-amazon-eks-workshop.git"
+  gitops_platform_basepath = "gitops/"
+  gitops_platform_path     = "platforms"
+  gitops_platform_revision = "riv24"
+
+  # gitops_addons_url      = data.terraform_remote_state.git.outputs.gitops_addons_url
+  # gitops_addons_basepath = data.terraform_remote_state.git.outputs.gitops_addons_basepath
+  # gitops_addons_path     = data.terraform_remote_state.git.outputs.gitops_addons_path
+  # gitops_addons_revision = data.terraform_remote_state.git.outputs.gitops_addons_revision
+
+  # gitops_platform_url      = data.terraform_remote_state.git.outputs.gitops_platform_url
+  # gitops_platform_basepath = data.terraform_remote_state.git.outputs.gitops_platform_basepath
+  # gitops_platform_path     = data.terraform_remote_state.git.outputs.gitops_platform_path
+  # gitops_platform_revision = data.terraform_remote_state.git.outputs.gitops_platform_revision
 
   gitops_workload_url      = data.terraform_remote_state.git.outputs.gitops_workload_url
   gitops_workload_basepath = data.terraform_remote_state.git.outputs.gitops_workload_basepath
@@ -103,6 +114,7 @@ locals {
     enable_prometheus_adapter              = try(var.addons.enable_prometheus_adapter, false)
     enable_secrets_store_csi_driver        = try(var.addons.enable_secrets_store_csi_driver, false)
     enable_vpa                             = try(var.addons.enable_vpa, false)
+    enable_adot_collector                  = try(var.addons.enable_adot_collector, false)
   }
   addons = merge(
     local.aws_addons,
@@ -139,6 +151,12 @@ locals {
       workload_repo_basepath = local.gitops_workload_basepath
       workload_repo_path     = local.gitops_workload_path
       workload_repo_revision = local.gitops_workload_revision
+    },
+    { 
+      amazon_managed_prometheus_url       = aws_prometheus_workspace.amp.prometheus_endpoint
+      adot_collector_namespace            = local.adot_collector_namespace
+      adot_collector_service_account_name = local.adot_collector_service_account_name    
+
     }
   )
 

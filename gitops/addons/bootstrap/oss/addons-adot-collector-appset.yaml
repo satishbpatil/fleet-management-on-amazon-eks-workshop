@@ -1,0 +1,58 @@
+---
+apiVersion: argoproj.io/v1alpha1
+kind: ApplicationSet
+metadata:
+  name: addons-adot-collector
+spec:
+  syncPolicy:
+    preserveResourcesOnDeletion: true
+  generators:
+    - merge:
+        mergeKeys: [server]
+        generators:
+          - clusters:
+              values:
+                addonChart: adot-collector
+              selector:
+                matchExpressions:
+                - key: enable_adot_collector
+                  operator: In
+                  values: ['true']
+  template:
+    metadata:
+      name: addon-{{name}}-{{values.addonChart}}
+    spec:
+      project: default
+      sources:
+        - repoURL: '{{metadata.annotations.platform_repo_url}}'
+          path: '{{metadata.annotations.platform_repo_basepath}}charts/{{values.chart}}'
+          targetRevision: '{{metadata.annotations.platform_repo_revision}}'
+          #ref: values
+          helm:
+            releaseName: '{{path.basename}}'          
+            ignoreMissingValueFiles: true
+            parmeters:
+            - name: --set
+              value: ampurl:'{{metadata.annotations.amazon_managed_prometheus_url}}'
+            - name: --set
+              value: region:'{{metadata.annotations.aws_region}}'
+            - name: --set
+              value: accountId:'{{metadata.annotations.aws_account_id}}'
+            - name: --set
+              value: ekscluster:'{{metadata.annotations.cluster_name}}'         
+             - name: --set
+              value: serviceAccount:'{{metadata.annotations.adot_collector_service_account_name}}'               
+             - name: --set
+              value: namespace:'{{metadata.annotations.adot_collector_namespace}}'                 
+            valueFiles:
+              - $values/{{metadata.annotations.addons_repo_basepath}}charts/addons/{{values.addonChart}}/values.yaml
+              - $values/{{metadata.annotations.addons_repo_basepath}}environments/{{metadata.labels.environment}}/addons/{{values.addonChart}}/values.yaml
+              - $values/{{metadata.annotations.addons_repo_basepath}}clusters/{{name}}/addons/{{values.addonChart}}/values.yaml
+      destination:
+        namespace: '{{values.addonChart}}'
+        name: '{{name}}'
+      syncPolicy:
+        automated: {}
+        syncOptions:
+          - CreateNamespace=true
+          - ServerSideApply=true  # Big CRDs.
