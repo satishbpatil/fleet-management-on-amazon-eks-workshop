@@ -40,9 +40,9 @@ spec:
               value: accountId:'{{metadata.annotations.aws_account_id}}'
             - name: --set
               value: ekscluster:'{{metadata.annotations.cluster_name}}'         
-             - name: --set
+            - name: --set
               value: serviceAccount:'{{metadata.annotations.adot_collector_service_account_name}}'               
-             - name: --set
+            - name: --set
               value: namespace:'{{metadata.annotations.adot_collector_namespace}}'                 
             valueFiles:
               - $values/{{metadata.annotations.addons_repo_basepath}}charts/addons/{{values.addonChart}}/values.yaml
